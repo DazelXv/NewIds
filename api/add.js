@@ -1,9 +1,9 @@
 import fetch from "node-fetch"
 
-const TOKEN="GITHUB_TOKEN"
-const USER="USERNAME"
-const REPO="REPO"
-const FILE="database.json"
+const TOKEN="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"
+const USER="DazelXv"
+const REPO="Newsletter"
+const FILE="idsnews.json"
 
 export default async function handler(req,res){
 
