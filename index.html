@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>CH Database Panel</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#111827;
+color:white;
+display:flex;
+justify-content:center;
+padding-top:40px;
+}
+
+.panel{
+background:#1f2937;
+padding:20px;
+border-radius:12px;
+width:360px;
+box-shadow:0 10px 25px rgba(0,0,0,0.5);
+}
+
+input{
+width:100%;
+padding:10px;
+border:none;
+border-radius:6px;
+margin-top:8px;
+background:#374151;
+color:white;
+}
+
+button{
+margin-top:8px;
+padding:10px;
+border:none;
+border-radius:6px;
+background:#2563eb;
+color:white;
+cursor:pointer;
+position:relative;
+overflow:hidden;
+}
+
+button span{
+position:absolute;
+background:rgba(255,255,255,0.4);
+transform:scale(0);
+border-radius:50%;
+animation:ripple .6s linear;
+}
+
+@keyframes ripple{
+to{
+transform:scale(4);
+opacity:0;
+}
+}
+
+.id{
+background:#374151;
+padding:8px;
+margin-top:6px;
+border-radius:6px;
+display:flex;
+justify-content:space-between;
+font-size:13px;
+}
+
+.toast{
+position:fixed;
+bottom:25px;
+left:50%;
+transform:translateX(-50%) translateY(20px);
+background:rgba(34,197,94,0.2);
+backdrop-filter:blur(10px);
+border:1px solid rgba(255,255,255,0.2);
+color:white;
+padding:12px 22px;
+border-radius:10px;
+opacity:0;
+transition:all .4s ease;
+font-size:14px;
+}
+
+.toast.show{
+opacity:1;
+transform:translateX(-50%) translateY(0);
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="panel">
+
+<h3>Database ID CH</h3>
+
+<input id="chid" placeholder="Masukkan ID Channel">
+
+<button onclick="add()">Tambah</button>
+
+<div id="list"></div>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+
+let db=[]
+
+async function load(){
+
+const res=await fetch("/api/db")
+
+db=await res.json()
+
+render()
+
+}
+
+function render(){
+
+let html=""
+
+db.forEach((x,i)=>{
+
+html+=`
+<div class="id">
+${x}
+<button onclick="del(${i})">X</button>
+</div>
+`
+
+})
+
+document.getElementById("list").innerHTML=html
+
+}
+
+async function add(){
+
+const id=document.getElementById("chid").value
+
+if(!id){
+showToast("ID tidak boleh kosong")
+return
+}
+
+await fetch("/api/add",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({id})
+
+})
+
+document.getElementById("chid").value=""
+
+showToast("✓ ID berhasil ditambahkan")
+
+load()
+
+}
+
+async function del(i){
+
+await fetch("/api/delete",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({index:i})
+
+})
+
+showToast("✓ ID berhasil dihapus")
+
+load()
+
+}
+
+function showToast(msg){
+
+const toast=document.getElementById("toast")
+
+toast.innerText=msg
+
+toast.classList.add("show")
+
+setTimeout(()=>{
+toast.classList.remove("show")
+},2000)
+
+}
+
+document.addEventListener("click",function(e){
+
+if(e.target.tagName==="BUTTON"){
+
+const btn=e.target
+
+const circle=document.createElement("span")
+
+const d=Math.max(btn.clientWidth,btn.clientHeight)
+
+circle.style.width=circle.style.height=d+"px"
+
+circle.style.left=e.offsetX-d/2+"px"
+circle.style.top=e.offsetY-d/2+"px"
+
+btn.appendChild(circle)
+
+setTimeout(()=>circle.remove(),600)
+
+}
+
+})
+
+load()
+
+</script>
+
+</body>
+  </html>
